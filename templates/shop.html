@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Shop – Pyem Crochet{% endblock %}
+
+{% block content %}
+
+<!-- PAGE HEADER -->
+<div class="page-header dark">
+  <h2>Our Collection</h2>
+  <p>Choose a style, we stitch it and deliver it to you within 7 days</p>
+</div>
+
+<!-- FILTER BAR -->
+<div class="filter-bar">
+  <a href="{% url 'shop' %}" class="filter-btn {% if not request.GET.category %}active{% endif %}">All</a>
+  <a href="?category=Tops" class="filter-btn {% if request.GET.category == 'Tops' %}active{% endif %}">Tops</a>
+  <a href="?category=Skirts" class="filter-btn {% if request.GET.category == 'Skirts' %}active{% endif %}">Skirts</a>
+  <a href="?category=Bags" class="filter-btn {% if request.GET.category == 'Bags' %}active{% endif %}">Bags</a>
+  <a href="?category=Scrunchies" class="filter-btn {% if request.GET.category == 'Scrunchies' %}active{% endif %}">Scrunchies</a>
+  <a href="?category=Hair Bands" class="filter-btn {% if request.GET.category == 'Hair Bands' %}active{% endif %}">Hair Bands</a>
+  <a href="?category=Bows" class="filter-btn {% if request.GET.category == 'Bows' %}active{% endif %}">Bows</a>
+  <a href="?category=Handkerchiefs" class="filter-btn {% if request.GET.category == 'Handkerchiefs' %}active{% endif %}">Handkerchiefs</a>
+  <a href="?category=Others" class="filter-btn {% if request.GET.category == 'Others' %}active{% endif %}">Others</a>
+</div>
+
+<!-- PRODUCTS -->
+<section class="section" style="padding-top: 40px;">
+  <div class="products-grid">
+    {% for product in products %}
+    <div class="product-card">
+
+      <div class="product-img">
+        {% if product.image %}
+          <img src="{{ product.image.url }}" alt="{{ product.name }}" />
+        {% else %}
+          <div class="placeholder">👗</div>
+        {% endif %}
+        {% if product.badge %}
+          <div class="product-badge">{{ product.badge }}</div>
+        {% endif %}
+      </div>
+
+      <div class="product-info">
+        <h3>{{ product.name }}</h3>
+
+        <div class="price-section">
+          {% if product.discount_price %}
+            <div class="original-price">₦{{ product.price|floatformat:0 }}</div>
+            <div class="price-row">
+              <span class="discount-price">₦{{ product.discount_price|floatformat:0 }}</span>
+              <span class="discount-badge">-{{ product.discount_percentage }}%</span>
+            </div>
+          {% else %}
+            <div class="discount-price">₦{{ product.price|floatformat:0 }}</div>
+          {% endif %}
+        </div>
+
+        <div class="desc">{{ product.description }}</div>
+        <a href="{% url 'add_to_cart' product.id %}" class="add-to-cart">Add to Cart</a>
+      </div>
+
+    </div>
+    {% empty %}
+    <div class="empty-products">
+      <div class="empty-icon">✂️</div>
+      <h3>No products yet</h3>
+      <p>The admin is still adding styles. Check back soon!</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- PAGINATION -->
+  {% if products.has_other_pages %}
+  <div class="pagination">
+    {% if products.has_previous %}
+      <a href="?page=1{% if category %}&category={{ category }}{% endif %}" class="page-btn">« First</a>
+      <a href="?page={{ products.previous_page_number }}{% if category %}&category={{ category }}{% endif %}" class="page-btn">‹ Prev</a>
+    {% endif %}
+
+    {% for num in products.paginator.page_range %}
+      {% if products.number == num %}
+        <span class="page-btn active">{{ num }}</span>
+      {% elif num > products.number|add:'-3' and num < products.number|add:'3' %}
+        <a href="?page={{ num }}{% if category %}&category={{ category }}{% endif %}" class="page-btn">{{ num }}</a>
+      {% endif %}
+    {% endfor %}
+
+    {% if products.has_next %}
+      <a href="?page={{ products.next_page_number }}{% if category %}&category={{ category }}{% endif %}" class="page-btn">Next ›</a>
+      <a href="?page={{ products.paginator.num_pages }}{% if category %}&category={{ category }}{% endif %}" class="page-btn">Last »</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+</section>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .page-header {
+    padding: 120px 80px 48px;
+  }
+
+  .page-header.dark {
+    background: var(--dark);
+  }
+
+  .page-header.dark h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: var(--cream);
+  }
+
+  .page-header.dark p {
+    color: rgba(245, 240, 232, 0.5);
+    font-size: 0.9rem;
+    margin-top: 8px;
+  }
+
+  .filter-bar {
+    background: var(--off-white);
+    padding: 20px 80px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid rgba(200, 149, 42, 0.15);
+  }
+
+  .filter-btn {
+    padding: 8px 20px;
+    border-radius: 4px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--mid);
+    background: transparent;
+    border: 1.5px solid rgba(200, 149, 42, 0.2);
+    transition: all 0.2s;
+  }
+
+  .filter-btn:hover,
+  .filter-btn.active {
+    background: var(--dark);
+    color: var(--cream);
+    border-color: var(--dark);
+  }
+
+  .empty-products {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 80px 0;
+    color: var(--mid);
+  }
+
+  .empty-icon {
+    font-size: 4rem;
+    margin-bottom: 16px;
+  }
+
+  .empty-products h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+    color: var(--dark);
+  }
+
+  .empty-products p {
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 768px) {
+    .page-header {
+      padding: 100px 24px 32px;
+    }
+
+    .filter-bar {
+      padding: 16px 24px;
+    }
+  }
+
+   .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    padding: 48px 0;
+    flex-wrap: wrap;
+  }
+
+  .page-btn {
+    padding: 10px 16px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--dark);
+    background: var(--off-white);
+    border: 1.5px solid rgba(200, 149, 42, 0.2);
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+
+  .page-btn:hover {
+    background: var(--dark);
+    color: var(--cream);
+    border-color: var(--dark);
+  }
+
+  .page-btn.active {
+    background: var(--gold);
+    color: var(--dark);
+    border-color: var(--gold);
+  }
+</style>
+
+  
+{% endblock %}

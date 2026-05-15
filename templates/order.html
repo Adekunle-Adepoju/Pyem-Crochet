@@ -1,0 +1,347 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Order – Pyem Crochet`{% endblock %}
+
+{% block content %}
+
+<!-- PAGE HEADER -->
+<div class="page-header green">
+  <h2>Your Details & Measurements</h2>
+  <p>Fill this form so we can stitch your perfect fit and deliver within 7-10 Working days</p>
+</div>
+
+<!-- ORDER FORM -->
+<div class="order-body">
+
+  <form method="POST" action="{% url 'order' %}">
+    {% csrf_token %}
+
+    <!-- PERSONAL INFO -->
+    <div class="form-section">
+      <h3>📋 Personal Information</h3>
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" name="full_name" placeholder="Adekunle Adepoju"
+            value="{{ user.get_full_name }}" required />
+        </div>
+
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" name="phone" placeholder="080xxxxxxxx" required />
+        </div>
+
+        <div class="form-group full">
+          <label>Email Address</label>
+          <input type="email" name="email" placeholder="you@example.com"
+            value="{{ user.email }}" required />
+        </div>
+
+        <div class="form-group full">
+          <label>Delivery Address</label>
+          <textarea name="address" placeholder="House number, street, city, state..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>State</label>
+          <select name="state">
+            <option value="">Select State</option>
+            <option>Lagos</option>
+            <option>Abuja</option>
+            <option>Kano</option>
+            <option>Rivers</option>
+            <option>Oyo</option>
+            <option>Anambra</option>
+            <option>Kaduna</option>
+            <option>Delta</option>
+            <option>Enugu</option>
+            <option>Edo</option>
+            <option>Ondo</option>
+            <option>Osun</option>
+            <option>Ekiti</option>
+            <option>Kwara</option>
+            <option>Ogun</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Gender</label>
+          <select name="gender">
+            <option value="">Select</option>
+            <option>Male</option>
+            <option>Female</option>
+          </select>
+        </div>
+
+      </div>
+    </div>
+
+   <!-- COLOUR PREFERENCE -->
+<div class="form-section">
+  <h3>🎨 Colour Preference (Optional)</h3>
+  <div class="form-grid">
+
+    <div class="form-group full">
+      <label>Preferred Colour(s) <span style="color:var(--mid); font-weight:400;">(optional)</span></label>
+      <input type="text" name="colour" placeholder="e.g. Navy Blue, Red, Black and White..." />
+    </div>
+
+    <div class="form-group full">
+      <label>Colour Notes <span style="color:var(--mid); font-weight:400;">(optional)</span></label>
+      <textarea name="colour_notes" placeholder="Any specific colour combination or pattern details..."></textarea>
+    </div>
+
+  </div>
+
+  <!-- COLOUR SWATCHES -->
+  <div class="colour-swatches">
+    <p class="swatch-label">Quick select a colour:</p>
+    <div class="swatch-grid">
+      <div class="swatch" style="background:#000000;" onclick="addColour('Black')" title="Black"></div>
+      <div class="swatch" style="background:#ffffff; border:1px solid #ddd;" onclick="addColour('White')" title="White"></div>
+      <div class="swatch" style="background:#ff0000;" onclick="addColour('Red')" title="Red"></div>
+      <div class="swatch" style="background:#0000ff;" onclick="addColour('Blue')" title="Blue"></div>
+      <div class="swatch" style="background:#008000;" onclick="addColour('Green')" title="Green"></div>
+      <div class="swatch" style="background:#ffff00;" onclick="addColour('Yellow')" title="Yellow"></div>
+      <div class="swatch" style="background:#ffa500;" onclick="addColour('Orange')" title="Orange"></div>
+      <div class="swatch" style="background:#800080;" onclick="addColour('Purple')" title="Purple"></div>
+      <div class="swatch" style="background:#ffc0cb;" onclick="addColour('Pink')" title="Pink"></div>
+      <div class="swatch" style="background:#a52a2a;" onclick="addColour('Brown')" title="Brown"></div>
+      <div class="swatch" style="background:#808080;" onclick="addColour('Grey')" title="Grey"></div>
+      <div class="swatch" style="background:#000080;" onclick="addColour('Navy Blue')" title="Navy Blue"></div>
+      <div class="swatch" style="background:#f5f5dc; border:1px solid #ddd;" onclick="addColour('Cream')" title="Cream"></div>
+      <div class="swatch" style="background:#c0a000;" onclick="addColour('Gold')" title="Gold"></div>
+      <div class="swatch" style="background:#40e0d0;" onclick="addColour('Turquoise')" title="Turquoise"></div>
+      <div class="swatch" style="background:#800000;" onclick="addColour('Maroon')" title="Maroon"></div>
+    </div>
+    <p class="swatch-hint">Click a colour to add it to the field above</p>
+  </div>
+
+</div>
+
+    <!-- MEASUREMENTS -->
+    <div class="form-section">
+      <h3>📐 Body Measurements</h3>
+      <div class="measurement-note">
+        💡 All measurements are in <strong>inches</strong>. Measure over your undergarments for best accuracy. When in doubt, add 0.5 inch.
+      </div>
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label>Chest / Bust (inches)</label>
+          <input type="number" name="chest" placeholder="e.g. 38" step="0.5" min="20" max="80" />
+        </div>
+
+        <div class="form-group">
+          <label>Waist (inches)</label>
+          <input type="number" name="waist" placeholder="e.g. 32" step="0.5" min="20" max="80" />
+        </div>
+
+        <div class="form-group">
+          <label>Hip (inches)</label>
+          <input type="number" name="hip" placeholder="e.g. 40" step="0.5" min="20" max="80" />
+        </div>
+
+        <div class="form-group">
+          <label>Shoulder Width (inches)</label>
+          <input type="number" name="shoulder" placeholder="e.g. 16" step="0.5" min="10" max="40" />
+        </div>
+
+        <div class="form-group">
+          <label>Sleeve Length (inches)</label>
+          <input type="number" name="sleeve" placeholder="e.g. 24" step="0.5" min="10" max="40" />
+        </div>
+
+        <div class="form-group">
+          <label>Top Length (inches)</label>
+          <input type="number" name="top_length" placeholder="e.g. 27" step="0.5" min="10" max="60" />
+        </div>
+
+        <div class="form-group">
+          <label>Trouser / Skirt Length (inches)</label>
+          <input type="number" name="trouser_length" placeholder="e.g. 40" step="0.5" min="10" max="60" />
+        </div>
+
+        <div class="form-group">
+          <label>Thigh (inches)</label>
+          <input type="number" name="thigh" placeholder="e.g. 22" step="0.5" min="10" max="50" />
+        </div>
+
+        <div class="form-group full">
+          <label>Additional Notes</label>
+          <textarea name="notes" placeholder="Any special requests, style preferences, or adjustments..."></textarea>
+        </div>
+
+      </div>
+    </div>
+
+    
+    <!-- ORDER ITEMS -->
+    {% if cart_items %}
+    <div class="form-section">
+      <h3>🛒 Items in Your Order</h3>
+      {% for item in cart_items %}
+      <div class="order-item-row">
+        <span>{{ item.product.name }} x{{ item.quantity }}</span>
+        <span>₦{{ item.subtotal|floatformat:0 }}</span>
+      </div>
+      {% endfor %}
+      <div class="order-item-row total-row">
+        <span>Delivery</span>
+        <span>₦1,500</span>
+      </div>
+      <div class="order-item-row total-row">
+        <strong>Total</strong>
+        <strong>₦{{ grand_total|floatformat:0 }}</strong>
+      </div>
+    </div>
+    {% endif %}
+
+    <button type="submit" class="btn-primary order-submit">
+      ✅ Place Order
+    </button>
+
+  </form>
+
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .order-body {
+    padding: 48px 80px;
+    max-width: 860px;
+  }
+
+  .form-section {
+    background: var(--off-white);
+    border-radius: 8px;
+    padding: 32px;
+    margin-bottom: 24px;
+    border: 1px solid rgba(200, 149, 42, 0.1);
+  }
+
+  .form-section h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(200, 149, 42, 0.15);
+    color: var(--dark);
+  }
+
+  .measurement-note {
+    background: rgba(200, 149, 42, 0.08);
+    border-left: 3px solid var(--gold);
+    padding: 12px 16px;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.85rem;
+    color: var(--mid);
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+
+  .order-item-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    font-size: 0.9rem;
+    color: var(--mid);
+    border-bottom: 1px solid rgba(200, 149, 42, 0.1);
+  }
+
+  .order-item-row:last-child {
+    border-bottom: none;
+  }
+
+  .total-row {
+    color: var(--dark);
+    font-weight: 600;
+  }
+
+  .order-submit {
+    padding: 16px 48px;
+    font-size: 1rem;
+    margin-bottom: 60px;
+  }
+
+  @media (max-width: 768px) {
+    .order-body {
+      padding: 24px;
+    }
+
+    .form-section {
+      padding: 20px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .order-body {
+      padding: 16px;
+    }
+
+    .order-submit {
+      width: 100%;
+      text-align: center;
+    }
+  }
+
+  .colour-swatches {
+  margin-top: 20px;
+}
+
+.swatch-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--mid);
+  margin-bottom: 12px;
+}
+
+.swatch-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.swatch {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.swatch:hover {
+  transform: scale(1.2);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.swatch-hint {
+  font-size: 0.75rem;
+  color: var(--mid);
+  margin-top: 4px;
+}
+</style>
+
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function addColour(colour) {
+    var field = document.querySelector('input[name="colour"]');
+    if (field.value === '') {
+      field.value = colour;
+    } else {
+      field.value = field.value + ', ' + colour;
+    }
+  }
+</script>
+{% endblock %}

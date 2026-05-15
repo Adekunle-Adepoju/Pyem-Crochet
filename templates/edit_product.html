@@ -1,0 +1,342 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Edit Product – Pyem Stitches Admin{% endblock %}
+
+{% block content %}
+
+<div class="admin-page">
+
+  <div class="admin-header">
+    <div>
+      <h2>Edit Product</h2>
+      <p>Update the details of {{ product.name }}</p>
+    </div>
+    <a href="{% url 'admin_panel' %}" class="btn-outline"
+      style="color:var(--cream); border-color:rgba(245,240,232,0.2);">
+      ← Back to Admin
+    </a>
+  </div>
+
+  <div class="edit-body">
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="admin-message {{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="POST" action="{% url 'edit_product' product.id %}" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <!-- CURRENT IMAGE -->
+      <div class="form-section-dark">
+        <h3>📸 Product Image</h3>
+
+        {% if product.image %}
+          <div class="current-image-wrap">
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="current-image" />
+            <p class="current-image-label">Current image</p>
+          </div>
+        {% else %}
+          <div class="no-current-image">No image uploaded yet</div>
+        {% endif %}
+
+        <div class="upload-zone" onclick="document.getElementById('productImage').click()">
+          <div class="upload-icon">📸</div>
+          <p><strong>Click to upload</strong> a new image</p>
+          <p class="upload-sub">Leave empty to keep the current image</p>
+        </div>
+        <input type="file" id="productImage" name="image" accept="image/*" hidden />
+      </div>
+
+      <!-- PRODUCT DETAILS -->
+      <div class="form-section-dark">
+        <h3>📋 Product Details</h3>
+
+        <div class="admin-form-grid">
+
+          <div class="admin-form-group">
+            <label class="admin-label">Product Name</label>
+            <input class="admin-input" type="text" name="name"
+              value="{{ product.name }}" required />
+          </div>
+
+          <div class="admin-form-group">
+            <label class="admin-label">Badge (optional)</label>
+            <input class="admin-input" type="text" name="badge"
+              value="{{ product.badge|default:'' }}"
+              placeholder="e.g. New, Bestseller, Popular" />
+          </div>
+
+          <div class="admin-form-group">
+            <label class="admin-label">Original Price (₦)</label>
+            <input class="admin-input" type="number" name="price"
+              value="{{ product.price }}" required />
+          </div>
+
+          <div class="admin-form-group">
+            <label class="admin-label">Discount Price (₦) — optional</label>
+            <input class="admin-input" type="number" name="discount_price"
+              value="{{ product.discount_price|default:'' }}"
+              placeholder="Leave empty if no promo" />
+          </div>
+
+          <div class="admin-form-group">
+            <label class="admin-label">Category</label>
+            <select class="admin-input" name="category">
+              <option value="">Select category</option>
+              <option {% if product.category == 'Tops' %}selected{% endif %}>Tops</option>
+              <option {% if product.category == 'Skirts' %}selected{% endif %}>Skirts</option>
+              <option {% if product.category == 'Bags' %}selected{% endif %}>Bags</option>
+              <option {% if product.category == 'Scrunchies' %}selected{% endif %}>Scrunchies</option>
+              <option {% if product.category == 'Hair Bands' %}selected{% endif %}>Hair Bands</option>
+              <option {% if product.category == 'Bows' %}selected{% endif %}>Bows</option>
+              <option {% if product.category == 'Handkerchiefs' %}selected{% endif %}>Handkerchiefs</option>
+              <option {% if product.category == 'Others' %}selected{% endif %}>Others</option>
+            </select>
+          </div>
+
+          <div class="admin-form-group">
+            <label class="admin-label">Gender</label>
+            <select class="admin-input" name="gender">
+              <option value="Unisex" {% if product.gender == 'Unisex' %}selected{% endif %}>Unisex</option>
+              <option value="Female" {% if product.gender == 'Female' %}selected{% endif %}>Female</option>
+              <option value="Male" {% if product.gender == 'Male' %}selected{% endif %}>Male</option>
+            </select>
+          </div>
+
+          <div class="admin-form-group full">
+            <label class="admin-label">Description</label>
+            <textarea class="admin-input" name="description"
+              rows="4" required>{{ product.description }}</textarea>
+          </div>
+
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary" style="padding:16px 48px; font-size:1rem;">
+        Save Changes
+      </button>
+
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .admin-page {
+    min-height: 100vh;
+    padding-top: 72px;
+    background: var(--dark);
+  }
+
+  .admin-header {
+    background: rgba(255, 255, 255, 0.04);
+    padding: 32px 48px;
+    border-bottom: 1px solid rgba(200, 149, 42, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .admin-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    color: var(--cream);
+    font-weight: 900;
+  }
+
+  .admin-header p {
+    color: rgba(245, 240, 232, 0.4);
+    font-size: 0.85rem;
+    margin-top: 4px;
+  }
+
+  .edit-body {
+    padding: 40px 48px;
+    max-width: 860px;
+  }
+
+  .form-section-dark {
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 8px;
+    padding: 32px;
+    border: 1px solid rgba(200, 149, 42, 0.1);
+    margin-bottom: 24px;
+  }
+
+  .form-section-dark h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    color: var(--cream);
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(200, 149, 42, 0.15);
+  }
+
+  .current-image-wrap {
+    margin-bottom: 20px;
+  }
+
+  .current-image {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid rgba(200, 149, 42, 0.2);
+  }
+
+  .current-image-label {
+    font-size: 0.78rem;
+    color: rgba(245, 240, 232, 0.35);
+    margin-top: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .no-current-image {
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    color: rgba(245, 240, 232, 0.25);
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .upload-zone {
+    border: 2px dashed rgba(200, 149, 42, 0.35);
+    border-radius: 10px;
+    padding: 32px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.02);
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 0;
+  }
+
+  .upload-zone:hover {
+    border-color: var(--gold);
+    background: rgba(200, 149, 42, 0.05);
+  }
+
+  .upload-icon {
+    font-size: 2rem;
+    margin-bottom: 8px;
+    opacity: 0.5;
+  }
+
+  .upload-zone p {
+    color: rgba(245, 240, 232, 0.5);
+    font-size: 0.88rem;
+  }
+
+  .upload-zone strong {
+    color: var(--gold);
+  }
+
+  .upload-sub {
+    font-size: 0.75rem !important;
+    margin-top: 4px;
+    opacity: 0.6;
+  }
+
+  .admin-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .admin-form-group.full {
+    grid-column: 1 / -1;
+  }
+
+  .admin-label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: rgba(245, 240, 232, 0.35);
+    margin-bottom: 8px;
+  }
+
+  .admin-input {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1.5px solid rgba(200, 149, 42, 0.2);
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--cream);
+    outline: none;
+    transition: border 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .admin-input:focus {
+    border-color: var(--gold);
+  }
+
+  .admin-input option {
+    background: var(--dark);
+    color: var(--cream);
+  }
+
+  .admin-input::placeholder {
+    color: rgba(245, 240, 232, 0.25);
+  }
+
+  .admin-message {
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+    border-left: 3px solid var(--gold);
+    background: rgba(200, 149, 42, 0.1);
+    color: var(--gold);
+  }
+
+  .admin-message.error {
+    border-left-color: var(--rust);
+    background: rgba(139, 58, 26, 0.15);
+    color: #ff8c69;
+  }
+
+  @media (max-width: 768px) {
+    .edit-body {
+      padding: 24px;
+    }
+
+    .admin-header {
+      padding: 24px;
+    }
+
+    .admin-form-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .form-section-dark {
+      padding: 20px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .edit-body {
+      padding: 16px;
+    }
+
+    .current-image {
+      width: 150px;
+      height: 150px;
+    }
+  }
+</style>
+{% endblock %}

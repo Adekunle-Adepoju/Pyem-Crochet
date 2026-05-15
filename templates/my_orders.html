@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Orders – Pyem Crochet{% endblock %}
+
+{% block content %}
+
+<div class="page-header dark">
+  <h2>My Orders</h2>
+  <p>Track all your orders here</p>
+</div>
+
+<div class="my-orders-body">
+  {% if orders %}
+    {% for order in orders %}
+    <div class="my-order-card">
+      <div class="my-order-top">
+        <div>
+          <div class="my-order-id">#ORD-{{ order.id }}</div>
+          <div class="my-order-date">{{ order.created_at|date:"d M Y, g:i a" }}</div>
+        </div>
+        <div class="order-status {{ order.status|lower }}">{{ order.status }}</div>
+      </div>
+
+      <div class="my-order-items">
+        {% for item in order.items.all %}
+        <div class="my-order-item">
+          <span>{{ item.product.name }} x{{ item.quantity }}</span>
+          <span>₦{{ item.subtotal|floatformat:0 }}</span>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="my-order-footer">
+        <span class="my-order-total">Total: ₦{{ order.total|floatformat:0 }}</span>
+        <div class="my-order-delivery">
+          📦 Delivered to {{ order.state }}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty-orders">
+      <div class="empty-icon">📦</div>
+      <h3>No orders yet</h3>
+      <p>You have not placed any orders yet. Browse our shop and order a style.</p>
+      <a href="{% url 'shop' %}" class="btn-primary" style="margin-top:24px;">Browse Shop</a>
+    </div>
+  {% endif %}
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .my-orders-body {
+    padding: 48px 80px;
+    max-width: 800px;
+  }
+
+  .my-order-card {
+    background: var(--off-white);
+    border-radius: 8px;
+    border: 1px solid rgba(200, 149, 42, 0.1);
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+
+  .my-order-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(200, 149, 42, 0.1);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .my-order-id {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 4px;
+  }
+
+  .my-order-date {
+    font-size: 0.78rem;
+    color: var(--mid);
+  }
+
+  .order-status {
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .order-status.pending {
+    background: rgba(139, 58, 26, 0.1);
+    color: var(--rust);
+  }
+
+  .order-status.stitching {
+    background: rgba(200, 149, 42, 0.1);
+    color: var(--gold);
+  }
+
+  .order-status.delivered {
+    background: rgba(45, 74, 45, 0.1);
+    color: var(--green);
+  }
+
+  .order-status.cancelled {
+    background: rgba(100, 100, 100, 0.1);
+    color: var(--mid);
+  }
+
+  .my-order-items {
+    padding: 16px 24px;
+    border-bottom: 1px solid rgba(200, 149, 42, 0.1);
+  }
+
+  .my-order-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.88rem;
+    color: var(--mid);
+    padding: 6px 0;
+  }
+
+  .my-order-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .my-order-total {
+    font-weight: 700;
+    color: var(--gold);
+    font-size: 1rem;
+  }
+
+  .my-order-delivery {
+    font-size: 0.82rem;
+    color: var(--mid);
+  }
+
+  .empty-orders {
+    text-align: center;
+    padding: 80px 40px;
+    color: var(--mid);
+  }
+
+  .empty-icon {
+    font-size: 4rem;
+    margin-bottom: 16px;
+  }
+
+  .empty-orders h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: var(--dark);
+    margin-bottom: 8px;
+  }
+
+  .empty-orders p {
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 768px) {
+    .my-orders-body {
+      padding: 32px 24px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .my-orders-body {
+      padding: 24px 16px;
+    }
+  }
+</style>
+{% endblock %}

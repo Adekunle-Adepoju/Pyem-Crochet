@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Create Account – Pyem Crochet{% endblock %}
+
+{% block content %}
+
+<div class="auth-page">
+
+  <!-- LEFT SIDE -->
+  <div class="auth-left">
+    <div class="auth-left-content">
+      <div class="auth-eyebrow">Join Us Today</div>
+      <h2>Start your<br><span>Tailoring</span><br>Journey</h2>
+      <p>Create an account to save your measurements, track your orders, and get notified when your outfit is ready.</p>
+      <div class="auth-perks">
+        <div class="perk-item">✂️ Save your measurements once</div>
+        <div class="perk-item">📦 Track every order in real time</div>
+        <div class="perk-item">🎁 Get exclusive member discounts</div>
+        <div class="perk-item">📐 Reorder your favourite styles</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT SIDE -->
+  <div class="auth-right">
+    <div class="auth-box">
+
+      <h3>Create Account</h3>
+      <p class="sub">Already have an account? <a href="{% url 'signin' %}">Sign in</a></p>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="form-message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+
+      <form method="POST" action="{% url 'register' %}">
+        {% csrf_token %}
+
+        <div class="name-row">
+          <div class="form-group">
+            <label>First Name</label>
+            <input type="text" name="first_name" placeholder="Ade" required />
+          </div>
+          <div class="form-group">
+            <label>Last Name</label>
+            <input type="text" name="last_name" placeholder="Kunle" required />
+          </div>
+        </div>
+          {% if messages %}
+          {% for message in messages %}
+            <div class="form-message {{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+          {% endif %}
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" name="email" placeholder="you@example.com" required />
+        </div>
+
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" name="phone" placeholder="080xxxxxxxx" required />
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" name="password1" placeholder="••••••••" required />
+        </div>
+
+        <div class="form-group">
+          <label>Confirm Password</label>
+          <input type="password" name="password2" placeholder="••••••••" required />
+        </div>
+
+        <div class="form-group">
+          <label>Gender</label>
+          <select name="gender">
+            <option value="">Select gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn-primary btn-full">Create Account</button>
+
+      </form>
+
+      <div class="auth-toggle">
+        By creating an account you agree to our
+        <a href="#">Terms of Service</a>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .auth-page {
+    min-height: 100vh;
+    display: flex;
+    padding-top: 72px;
+  }
+
+  .auth-left {
+    flex: 1;
+    background: var(--dark);
+    padding: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .auth-left::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      45deg, var(--gold) 0, var(--gold) 1px, transparent 0, transparent 50%
+    );
+    background-size: 24px 24px;
+    opacity: 0.04;
+  }
+
+  .auth-left-content {
+    position: relative;
+    z-index: 2;
+  }
+
+  .auth-eyebrow {
+    font-size: 0.7rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .auth-eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 30px;
+    height: 1px;
+    background: var(--gold);
+  }
+
+  .auth-left h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    font-weight: 900;
+    color: var(--cream);
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+
+  .auth-left h2 span {
+    color: var(--gold);
+    font-style: italic;
+  }
+
+  .auth-left p {
+    color: rgba(245, 240, 232, 0.55);
+    line-height: 1.7;
+    font-size: 0.95rem;
+    margin-bottom: 32px;
+    max-width: 360px;
+  }
+
+  .auth-perks {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .perk-item {
+    font-size: 0.85rem;
+    color: rgba(245, 240, 232, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .auth-right {
+    flex: 1;
+    background: var(--off-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px;
+    overflow-y: auto;
+  }
+
+  .auth-box {
+    width: 100%;
+    max-width: 420px;
+  }
+
+  .auth-box h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--dark);
+    margin-bottom: 8px;
+  }
+
+  .auth-box .sub {
+    color: var(--mid);
+    font-size: 0.9rem;
+    margin-bottom: 32px;
+  }
+
+  .auth-box .sub a {
+    color: var(--gold);
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .auth-box .sub a:hover {
+    text-decoration: underline;
+  }
+
+  .name-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .form-message {
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+  }
+
+  .form-message.error {
+    background: rgba(139, 58, 26, 0.1);
+    color: var(--rust);
+    border-left: 3px solid var(--rust);
+  }
+
+  .form-message.success {
+    background: rgba(45, 74, 45, 0.1);
+    color: var(--green);
+    border-left: 3px solid var(--green);
+  }
+
+  .auth-toggle {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.82rem;
+    color: var(--mid);
+    line-height: 1.6;
+  }
+
+  .auth-toggle a {
+    color: var(--gold);
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .auth-toggle a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 768px) {
+    .auth-left {
+      display: none;
+    }
+
+    .auth-right {
+      padding: 40px 24px;
+    }
+
+    .name-row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}

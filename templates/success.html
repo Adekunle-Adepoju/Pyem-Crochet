@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Order Placed – Pyem Crochet{% endblock %}
+
+{% block content %}
+
+<div class="success-page">
+
+  <div class="success-card">
+
+    <!-- ICON -->
+    <div class="success-icon">✂️</div>
+
+    <!-- MESSAGE -->
+    <h1>Order Placed!</h1>
+    <p class="success-sub">Thank you for choosing Pyem Crochet. Your outfit is in good hands.</p>
+
+    <!-- WHAT HAPPENS NEXT -->
+    <div class="next-steps">
+      <h3>What happens next?</h3>
+
+      <div class="next-step">
+        <div class="step-dot">1</div>
+        <div class="step-text">
+          <strong>We review your measurements</strong>
+          <span>Our tailor will go through your details carefully</span>
+        </div>
+      </div>
+
+      <div class="next-step">
+        <div class="step-dot">2</div>
+        <div class="step-text">
+          <strong>Stitching begins</strong>
+          <span>Your outfit will be carefully crafted by hand</span>
+        </div>
+      </div>
+
+      <div class="next-step">
+        <div class="step-dot">3</div>
+        <div class="step-text">
+          <strong>We contact you</strong>
+          <span>We will reach out via phone or email if we need clarification</span>
+        </div>
+      </div>
+
+      <div class="next-step">
+        <div class="step-dot">4</div>
+        <div class="step-text">
+          <strong>Delivered within 7-10 Working days days</strong>
+          <span>Your outfit arrives fresh at your doorstep</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- CONTACT NOTE -->
+    <div class="contact-note">
+      <p>Have a question about your order? Reach us at</p>
+      <a href="tel:09161921171">📞 09161921171</a>
+      <a href="mailto:Seunopeyemi1708@gmail.com">✉️ Seunopeyemi1708@gmail.com</a>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="success-actions">
+      <a href="{% url 'shop' %}" class="btn-primary">Continue Shopping</a>
+      <a href="{% url 'index' %}" class="btn-outline">Go Home</a>
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .success-page {
+    min-height: 100vh;
+    padding: 120px 24px 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--cream);
+  }
+
+  .success-card {
+    background: var(--off-white);
+    border-radius: 12px;
+    padding: 56px 48px;
+    max-width: 600px;
+    width: 100%;
+    text-align: center;
+    border: 1px solid rgba(200, 149, 42, 0.15);
+    box-shadow: 0 20px 60px var(--shadow);
+  }
+
+  .success-icon {
+    font-size: 4rem;
+    margin-bottom: 24px;
+    display: block;
+  }
+
+  .success-card h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: var(--dark);
+    margin-bottom: 12px;
+  }
+
+  .success-sub {
+    font-size: 1rem;
+    color: var(--mid);
+    line-height: 1.6;
+    margin-bottom: 40px;
+  }
+
+  .next-steps {
+    background: var(--cream);
+    border-radius: 8px;
+    padding: 28px;
+    margin-bottom: 32px;
+    text-align: left;
+    border: 1px solid rgba(200, 149, 42, 0.1);
+  }
+
+  .next-steps h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    color: var(--dark);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(200, 149, 42, 0.15);
+  }
+
+  .next-step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 16px;
+  }
+
+  .next-step:last-child {
+    margin-bottom: 0;
+  }
+
+  .step-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--gold);
+    color: var(--dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .step-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-top: 4px;
+  }
+
+  .step-text strong {
+    font-size: 0.9rem;
+    color: var(--dark);
+    font-weight: 600;
+  }
+
+  .step-text span {
+    font-size: 0.82rem;
+    color: var(--mid);
+    line-height: 1.5;
+  }
+
+  .contact-note {
+    background: rgba(200, 149, 42, 0.08);
+    border-left: 3px solid var(--gold);
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 32px;
+    text-align: left;
+  }
+
+  .contact-note p {
+    font-size: 0.85rem;
+    color: var(--mid);
+    margin-bottom: 8px;
+  }
+
+  .contact-note a {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--dark);
+    text-decoration: none;
+    font-weight: 600;
+    margin-bottom: 4px;
+    transition: color 0.2s;
+  }
+
+  .contact-note a:hover {
+    color: var(--gold);
+  }
+
+  .success-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 480px) {
+    .success-card {
+      padding: 32px 20px;
+    }
+
+    .success-card h1 {
+      font-size: 2rem;
+    }
+
+    .success-actions {
+      flex-direction: column;
+    }
+
+    .success-actions a {
+      width: 100%;
+      text-align: center;
+    }
+  }
+</style>
+{% endblock %}
