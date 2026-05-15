@@ -21,4 +21,6 @@ urlpatterns = [
     path('profile/', views.profile, name='profile'),
     path('my-orders/', views.my_orders, name='my_orders'),
     path('admin-panel/edit/<int:product_id>/', views.edit_product, name='edit_product'),
+    path('payment/<int:order_id>/', views.payment, name='payment'),
+    path('confirm-payment/<int:order_id>/', views.confirm_payment, name='confirm_payment'),
 ]

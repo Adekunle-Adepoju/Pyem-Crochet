@@ -54,6 +54,13 @@ class Order(models.Model):
         ('Cancelled', 'Cancelled'),
     ]
 
+    PAYMENT_STATUS_CHOICES = [
+        ('Unpaid', 'Unpaid'),
+        ('Awaiting Confirmation', 'Awaiting Confirmation'),
+        ('Half Paid', 'Half Paid'),
+        ('Fully Paid', 'Fully Paid'),
+    ]
+
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     full_name = models.CharField(max_length=200)
     email = models.EmailField()
@@ -73,14 +80,24 @@ class Order(models.Model):
     thigh = models.CharField(max_length=20, blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
 
-    # FABRIC
-    fabric = models.CharField(max_length=100, blank=True, null=True)
-    colour = models.CharField(max_length=100, blank=True, null=True)
+    # COLOUR
+    colour = models.CharField(max_length=200, blank=True, null=True)
+    colour_notes = models.TextField(blank=True, null=True)
 
     # ORDER INFO
     total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
+
+    # PAYMENT
+    payment_status = models.CharField(max_length=30, choices=PAYMENT_STATUS_CHOICES, default='Unpaid')
+    amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    transfer_reference = models.CharField(max_length=200, blank=True, null=True)
+    receipt = models.ImageField(upload_to='receipts/', blank=True, null=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Order #{self.id} - {self.full_name}'
 
     def __str__(self):
         return f'Order #{self.id} - {self.full_name}'
@@ -97,3 +114,5 @@ class OrderItem(models.Model):
 
     def subtotal(self):
         return self.price * self.quantity
+    
+    

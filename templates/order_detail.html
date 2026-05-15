@@ -41,6 +41,43 @@
 
     <div class="detail-grid">
 
+      <div class="detail-card" style="margin-top:20px;">
+  <h3>💳 Payment Details</h3>
+  <div class="detail-row">
+    <span class="detail-label">Payment Status</span>
+    <span class="detail-value">{{ order.payment_status }}</span>
+  </div>
+  <div class="detail-row">
+    <span class="detail-label">Amount Paid</span>
+    <span class="detail-value">₦{{ order.amount_paid|floatformat:0 }}</span>
+  </div>
+  <div class="detail-row">
+    <span class="detail-label">Balance Due</span>
+    <span class="detail-value">₦{{ order.total|floatformat:0 }}</span>
+  </div>
+  <div class="detail-row">
+    <span class="detail-label">Transfer Reference</span>
+    <span class="detail-value">{{ order.transfer_reference|default:"Not submitted yet" }}</span>
+  </div>
+  {% if order.receipt %}
+  <div class="detail-row">
+    <span class="detail-label">Receipt</span>
+    <a href="{{ order.receipt.url }}" target="_blank" style="color:var(--gold);">View Receipt</a>
+  </div>
+  {% endif %}
+
+  <!-- CONFIRM PAYMENT BUTTON -->
+  {% if order.payment_status == 'Awaiting Confirmation' %}
+  <form method="POST" style="margin-top:16px;">
+    {% csrf_token %}
+    <input type="hidden" name="payment_action" value="confirm" />
+    <button type="submit" class="btn-primary" style="padding:12px 24px;">
+      ✅ Confirm Payment Received
+    </button>
+  </form>
+  {% endif %}
+</div>
+
       <!-- CUSTOMER INFO -->
       <div class="detail-card">
         <h3>👤 Customer Information</h3>

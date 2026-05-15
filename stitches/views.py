@@ -2,10 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from .models import Product, Order, OrderItem
 from django.core.paginator import Paginator
 from django.core.mail import send_mail
 from django.conf import settings
+from .models import Product, Order, OrderItem
 
 
 # ─── HOME ───
@@ -31,19 +31,18 @@ def shop(request):
         'category': category,
     })
 
+
 # ─── SIGN IN ───
 def signin(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
 
-        # TRY TO FIND USER BY EMAIL FIRST
         user = None
         try:
             user_obj = User.objects.get(email=email)
             user = authenticate(request, username=user_obj.username, password=password)
         except User.DoesNotExist:
-            # IF NOT FOUND BY EMAIL TRY USERNAME
             user = authenticate(request, username=email, password=password)
 
         if user is not None:
@@ -54,6 +53,7 @@ def signin(request):
             messages.error(request, 'Incorrect email or password. Please try again.')
 
     return render(request, 'signin.html')
+
 
 # ─── REGISTER ───
 def register(request):
@@ -86,13 +86,14 @@ def register(request):
                 last_name=last_name,
             )
             login(request, user)
-            messages.success(request, 'Welcome to Pyem Crochet, ' + first_name + '!')
+            messages.success(request, 'Welcome to Pyem Stitches, ' + first_name + '!')
             return redirect('index')
         except Exception as e:
             messages.error(request, str(e))
             return render(request, 'register.html')
 
     return render(request, 'register.html')
+
 
 # ─── SIGN OUT ───
 def signout(request):
@@ -132,6 +133,7 @@ def cart(request):
         'cart_total': cart_total,
         'grand_total': grand_total,
     })
+
 
 # ─── ADD TO CART ───
 def add_to_cart(request, product_id):
@@ -191,7 +193,6 @@ def order(request):
             messages.error(request, 'Your cart is empty.')
             return redirect('shop')
 
-        # SAVE ORDER
         new_order = Order.objects.create(
             user=request.user,
             full_name=request.POST.get('full_name'),
@@ -209,12 +210,12 @@ def order(request):
             trouser_length=request.POST.get('trouser_length'),
             thigh=request.POST.get('thigh'),
             notes=request.POST.get('notes'),
-            fabric=request.POST.get('fabric'),
             colour=request.POST.get('colour'),
+            colour_notes=request.POST.get('colour_notes'),
             status='Pending',
+            payment_status='Unpaid',
         )
 
-        # SAVE ORDER ITEMS
         cart_total = 0
         order_items_text = ''
         for product_id, quantity in cart_data.items():
@@ -232,16 +233,15 @@ def order(request):
             except Product.DoesNotExist:
                 pass
 
-        # SAVE TOTAL
         new_order.total = cart_total + 1500
         new_order.save()
 
-        # SEND EMAIL NOTIFICATION TO YOU
+        # NOTIFY ADMIN
         try:
             send_mail(
                 subject=f'New Order #{new_order.id} from {new_order.full_name}',
                 message=f'''
-You have a new order on Pyem Crochet!
+You have a new order on Pyem Stitches!
 
 ORDER DETAILS
 --------------
@@ -269,13 +269,12 @@ Top Length: {new_order.top_length} inches
 Trouser/Skirt Length: {new_order.trouser_length} inches
 Thigh: {new_order.thigh} inches
 
-FABRIC
+COLOUR PREFERENCE
 --------------
-Fabric: {new_order.fabric}
 Colour: {new_order.colour}
-Notes: {new_order.notes}
+Notes: {new_order.colour_notes}
 
-View full order at: http://127.0.0.1:8000/admin-panel/order/{new_order.id}/
+View full order at: http://ade22.pythonanywhere.com/admin-panel/order/{new_order.id}/
                 ''',
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=['Seunopeyemi1708@gmail.com'],
@@ -284,11 +283,9 @@ View full order at: http://127.0.0.1:8000/admin-panel/order/{new_order.id}/
         except:
             pass
 
-        # CLEAR CART
         request.session['cart'] = {}
-        return redirect('success')
+        return redirect('payment', order_id=new_order.id)
 
-    # GET REQUEST
     cart_data = request.session.get('cart', {})
     cart_items = []
     cart_total = 0
@@ -315,10 +312,94 @@ View full order at: http://127.0.0.1:8000/admin-panel/order/{new_order.id}/
     })
 
 
+# ─── PAYMENT ───
+def payment(request, order_id):
+    if not request.user.is_authenticated:
+        return redirect('signin')
+    order = get_object_or_404(Order, id=order_id)
+    amount_to_pay = order.total / 2
+    return render(request, 'payment.html', {
+        'order': order,
+        'amount_to_pay': amount_to_pay,
+    })
+
+
+# ─── CONFIRM PAYMENT ───
+def confirm_payment(request, order_id):
+    if not request.user.is_authenticated:
+        return redirect('signin')
+    order = get_object_or_404(Order, id=order_id)
+
+    if request.method == 'POST':
+        transfer_reference = request.POST.get('transfer_reference')
+        receipt = request.FILES.get('receipt')
+
+        order.transfer_reference = transfer_reference
+        order.payment_status = 'Awaiting Confirmation'
+        if receipt:
+            order.receipt = receipt
+        order.save()
+
+        # NOTIFY ADMIN
+        try:
+            send_mail(
+                subject=f'Payment Receipt Submitted – Order #{order.id}',
+                message=f'''
+A customer has submitted payment for Order #{order.id}.
+
+Customer: {order.full_name}
+Phone: {order.phone}
+Email: {order.email}
+Amount Due: ₦{order.total / 2}
+Transfer Reference: {transfer_reference}
+
+Please confirm the payment in the admin panel:
+http://ade22.pythonanywhere.com/admin-panel/order/{order.id}/
+                ''',
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=['Seunopeyemi1708@gmail.com'],
+                fail_silently=True,
+            )
+        except:
+            pass
+
+        messages.success(request, 'Payment details submitted! We will confirm within a few hours.')
+        return redirect('success')
+
+    return redirect('payment', order_id=order.id)
+
+
 # ─── SUCCESS ───
 def success(request):
-    request.session['cart'] = {}
     return render(request, 'success.html')
+
+
+# ─── PROFILE ───
+def profile(request):
+    if not request.user.is_authenticated:
+        return redirect('signin')
+    return render(request, 'profile.html', {'user': request.user})
+
+
+# ─── MY ORDERS ───
+def my_orders(request):
+    if not request.user.is_authenticated:
+        return redirect('signin')
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'my_orders.html', {'orders': orders})
+
+
+# ─── DELETE ACCOUNT ───
+def delete_account(request):
+    if not request.user.is_authenticated:
+        return redirect('signin')
+    if request.method == 'POST':
+        user = request.user
+        logout(request)
+        user.delete()
+        messages.success(request, 'Your account has been deleted successfully.')
+        return redirect('index')
+    return render(request, 'delete_account.html')
 
 
 # ─── ADMIN PANEL ───
@@ -331,6 +412,7 @@ def admin_panel(request):
         'products': products,
         'orders': orders,
     })
+
 
 # ─── ADD PRODUCT ───
 def add_product(request):
@@ -346,7 +428,6 @@ def add_product(request):
         description = request.POST.get('description')
         image = request.FILES.get('image')
 
-        # ONLY SAVE DISCOUNT PRICE IF IT IS NOT EMPTY
         if discount_price and discount_price.strip() != '':
             discount_price = discount_price.strip()
         else:
@@ -366,6 +447,33 @@ def add_product(request):
         return redirect('admin_panel')
     return redirect('admin_panel')
 
+
+# ─── EDIT PRODUCT ───
+def edit_product(request, product_id):
+    if not request.user.is_staff:
+        return redirect('index')
+    product = get_object_or_404(Product, id=product_id)
+
+    if request.method == 'POST':
+        product.name = request.POST.get('name')
+        product.price = request.POST.get('price')
+        discount_price = request.POST.get('discount_price')
+        product.discount_price = discount_price if discount_price and discount_price.strip() != '' else None
+        product.category = request.POST.get('category')
+        product.gender = request.POST.get('gender')
+        product.badge = request.POST.get('badge')
+        product.description = request.POST.get('description')
+
+        if request.FILES.get('image'):
+            product.image = request.FILES.get('image')
+
+        product.save()
+        messages.success(request, '"' + product.name + '" has been updated successfully!')
+        return redirect('admin_panel')
+
+    return render(request, 'edit_product.html', {'product': product})
+
+
 # ─── DELETE PRODUCT ───
 def delete_product(request, product_id):
     if not request.user.is_staff:
@@ -375,6 +483,8 @@ def delete_product(request, product_id):
     messages.success(request, 'Product deleted successfully.')
     return redirect('admin_panel')
 
+
+# ─── ORDER DETAIL ───
 def order_detail(request, order_id):
     if not request.user.is_staff:
         return redirect('index')
@@ -382,12 +492,45 @@ def order_detail(request, order_id):
     items = order.items.all()
 
     if request.method == 'POST':
+
+        # CONFIRM PAYMENT
+        payment_action = request.POST.get('payment_action')
+        if payment_action == 'confirm':
+            order.payment_status = 'Half Paid'
+            order.amount_paid = order.total / 2
+            order.save()
+
+            try:
+                send_mail(
+                    subject=f'Payment Confirmed – Order #{order.id}',
+                    message=f'''
+Hi {order.full_name},
+
+Your payment of ₦{order.total / 2} for Order #{order.id} has been confirmed!
+
+We will now begin stitching your outfit. You will be notified once it is ready for delivery.
+
+Remaining balance of ₦{order.total / 2} will be collected on delivery.
+
+Thank you for choosing Pyem Stitches!
+📞 09125072582
+                    ''',
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[order.email],
+                    fail_silently=True,
+                )
+            except:
+                pass
+
+            messages.success(request, 'Payment confirmed! Customer has been notified.')
+            return redirect('order_detail', order_id=order.id)
+
+        # UPDATE STATUS
         old_status = order.status
         new_status = request.POST.get('status')
         order.status = new_status
         order.save()
 
-        # SEND EMAIL TO CUSTOMER WHEN STATUS CHANGES
         if old_status != new_status:
             try:
                 if new_status == 'Stitching':
@@ -395,22 +538,15 @@ def order_detail(request, order_id):
                     message = f'''
 Hi {order.full_name},
 
-Great news! Your order #{order.id} from Pyem Crochet is now being stitched.
+Great news! Your order #{order.id} from Pyem Stitches is now being stitched.
 
 Our tailor has started working on your outfit and it will be ready soon.
-
-ORDER SUMMARY
---------------
-Items: {', '.join([f"{item.product.name} x{item.quantity}" for item in items])}
-Total: ₦{order.total}
-
-We will notify you again once your order is on its way.
 
 If you have any questions contact us:
 📞 09125072582
 ✉️ Seunopeyemi1708@gmail.com
 
-Thank you for choosing Pyem Crochet!
+Thank you for choosing Pyem Stitches!
                     '''
 
                 elif new_status == 'Delivered':
@@ -418,23 +554,17 @@ Thank you for choosing Pyem Crochet!
                     message = f'''
 Hi {order.full_name},
 
-Your order #{order.id} from Pyem Crochet has been delivered!
+Your order #{order.id} from Pyem Stitches has been delivered!
 
-We hope you love your new outfit. Thank you for choosing Pyem Crochet.
+We hope you love your new outfit. Thank you for choosing Pyem Stitches.
 
-ORDER SUMMARY
---------------
-Items: {', '.join([f"{item.product.name} x{item.quantity}" for item in items])}
-Total: ₦{order.total}
-Delivered to: {order.state}
+Please remember to pay the remaining balance of ₦{order.total / 2} on delivery.
 
-We would love to see you again! Visit our shop to order more styles.
-
-If you have any issues with your order contact us:
+If you have any issues contact us:
 📞 09125072582
 ✉️ Seunopeyemi1708@gmail.com
 
-Thank you for choosing Pyem Crochet!
+Thank you for choosing Pyem Stitches!
                     '''
 
                 elif new_status == 'Cancelled':
@@ -442,15 +572,13 @@ Thank you for choosing Pyem Crochet!
                     message = f'''
 Hi {order.full_name},
 
-Unfortunately your order #{order.id} from Pyem Crochet has been cancelled.
+Unfortunately your order #{order.id} from Pyem Stitches has been cancelled.
 
 If you think this is a mistake or need more information please contact us:
 📞 09125072582
 ✉️ Seunopeyemi1708@gmail.com
 
 We are sorry for any inconvenience caused.
-
-Thank you for choosing Pyem Crochet.
                     '''
 
                 else:
@@ -476,40 +604,3 @@ Thank you for choosing Pyem Crochet.
         'order': order,
         'items': items,
     })
-
-def profile(request):
-    if not request.user.is_authenticated:
-        return redirect('signin')
-    return render(request, 'profile.html', {'user': request.user})
-
-
-def my_orders(request):
-    if not request.user.is_authenticated:
-        return redirect('signin')
-    orders = Order.objects.filter(user=request.user).order_by('-created_at')
-    return render(request, 'my_orders.html', {'orders': orders})
-
-
-def edit_product(request, product_id):
-    if not request.user.is_staff:
-        return redirect('index')
-    product = get_object_or_404(Product, id=product_id)
-
-    if request.method == 'POST':
-        product.name = request.POST.get('name')
-        product.price = request.POST.get('price')
-        discount_price = request.POST.get('discount_price')
-        product.discount_price = discount_price if discount_price and discount_price.strip() != '' else None
-        product.category = request.POST.get('category')
-        product.gender = request.POST.get('gender')
-        product.badge = request.POST.get('badge')
-        product.description = request.POST.get('description')
-
-        if request.FILES.get('image'):
-            product.image = request.FILES.get('image')
-
-        product.save()
-        messages.success(request, '"' + product.name + '" has been updated successfully!')
-        return redirect('admin_panel')
-
-    return render(request, 'edit_product.html', {'product': product})

@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Payment – Pyem Stitches{% endblock %}
+
+{% block content %}
+
+<div class="payment-page">
+  <div class="payment-card">
+
+    <div class="payment-icon">💳</div>
+    <h2>Complete Your Payment</h2>
+    <p class="payment-sub">Pay 50% upfront to confirm your order. You will pay the remaining 50% when your outfit is delivered.</p>
+
+    <!-- AMOUNT -->
+    <div class="payment-breakdown">
+      <div class="payment-row">
+        <span>Order Total</span>
+        <span>₦{{ order.total|floatformat:0 }}</span>
+      </div>
+      <div class="payment-row">
+        <span>50% Due Now</span>
+        <span class="payment-amount">₦{{ amount_to_pay|floatformat:0 }}</span>
+      </div>
+      <div class="payment-row">
+        <span>Remaining 50%</span>
+        <span>Paid on delivery</span>
+      </div>
+    </div>
+
+    <!-- BANK DETAILS -->
+    <div class="bank-details">
+      <h3>🏦 Bank Transfer Details</h3>
+      <div class="bank-row">
+        <span class="bank-label">Bank Name</span>
+        <span class="bank-value">Opay</span>
+      </div>
+      <div class="bank-row">
+        <span class="bank-label">Account Number</span>
+        <span class="bank-value account-num">9125072582</span>
+      </div>
+      <div class="bank-row">
+        <span class="bank-label">Account Name</span>
+        <span class="bank-value">Pyem Stitches</span>
+      </div>
+      <div class="bank-row">
+        <span class="bank-label">Amount to Send</span>
+        <span class="bank-value gold">₦{{ amount_to_pay|floatformat:0 }}</span>
+      </div>
+    </div>
+
+    <div class="payment-note">
+      ⚠️ Please use your <strong>full name</strong> as the transfer narration so we can identify your payment.
+    </div>
+
+    <!-- SUBMIT RECEIPT -->
+    <form method="POST" action="{% url 'confirm_payment' order.id %}" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <div class="form-group" style="margin-top:24px; text-align:left;">
+        <label>Transfer Reference / Transaction ID</label>
+        <input type="text" name="transfer_reference"
+          placeholder="e.g. TRF2025010012345" required />
+      </div>
+
+      <div class="form-group" style="text-align:left;">
+        <label>Upload Receipt <span style="color:var(--mid); font-weight:400;">(optional)</span></label>
+        <input type="file" name="receipt" accept="image/*" />
+      </div>
+
+      <button type="submit" class="btn-primary btn-full" style="padding:16px; font-size:1rem;">
+        I Have Made the Transfer ✅
+      </button>
+
+    </form>
+
+    <a href="{% url 'cart' %}" class="btn-outline btn-full" style="margin-top:12px;">
+      ← Go Back
+    </a>
+
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .payment-page {
+    min-height: 100vh;
+    padding: 120px 24px 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--cream);
+  }
+
+  .payment-card {
+    background: var(--off-white);
+    border-radius: 12px;
+    padding: 48px;
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+    border: 1px solid rgba(200, 149, 42, 0.15);
+    box-shadow: 0 20px 60px var(--shadow);
+  }
+
+  .payment-icon {
+    font-size: 3rem;
+    margin-bottom: 20px;
+  }
+
+  .payment-card h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--dark);
+    margin-bottom: 12px;
+  }
+
+  .payment-sub {
+    color: var(--mid);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+
+  .payment-breakdown {
+    background: var(--cream);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(200, 149, 42, 0.1);
+    text-align: left;
+  }
+
+  .payment-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 0.88rem;
+    color: var(--mid);
+    border-bottom: 1px solid rgba(200, 149, 42, 0.08);
+  }
+
+  .payment-row:last-child {
+    border-bottom: none;
+  }
+
+  .payment-amount {
+    color: var(--gold);
+    font-weight: 700;
+    font-size: 1rem;
+  }
+
+  .bank-details {
+    background: var(--dark);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    text-align: left;
+    border: 1px solid rgba(200, 149, 42, 0.2);
+  }
+
+  .bank-details h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    color: var(--cream);
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(200, 149, 42, 0.15);
+  }
+
+  .bank-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .bank-row:last-child {
+    border-bottom: none;
+  }
+
+  .bank-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: rgba(245, 240, 232, 0.35);
+    font-weight: 600;
+  }
+
+  .bank-value {
+    font-size: 0.9rem;
+    color: var(--cream);
+    font-weight: 600;
+  }
+
+  .account-num {
+    font-size: 1.1rem;
+    color: var(--gold);
+    letter-spacing: 2px;
+  }
+
+  .gold {
+    color: var(--gold);
+    font-size: 1.1rem;
+  }
+
+  .payment-note {
+    background: rgba(200, 149, 42, 0.08);
+    border-left: 3px solid var(--gold);
+    padding: 12px 16px;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.82rem;
+    color: var(--mid);
+    text-align: left;
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+
+  @media (max-width: 480px) {
+    .payment-card {
+      padding: 32px 20px;
+    }
+
+    .payment-card h2 {
+      font-size: 1.6rem;
+    }
+  }
+</style>
+{% endblock %}
