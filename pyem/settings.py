@@ -126,4 +126,10 @@ EMAIL_HOST_PASSWORD = 'gwkd qkfq hizw gpnq'
 DEFAULT_FROM_EMAIL = 'Seunopeyemi1708@gmail.com'
 
 
+
+
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_COOKIE_AGE = 1209600
+SESSION_COOKIE_SECURE = False
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False

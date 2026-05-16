@@ -167,6 +167,9 @@ def order(request):
     if request.method == 'POST':
         cart_data = request.session.get('cart', {})
 
+        # DEBUG - print cart data
+        print('CART DATA ON POST:', cart_data)
+
         if not cart_data:
             messages.error(request, 'Your cart is empty. Please add items before ordering.')
             return redirect('shop')
@@ -251,7 +254,7 @@ COLOUR PREFERENCE
 Colour: {new_order.colour}
 Notes: {new_order.colour_notes}
 
-View full order at: http://127.0.0.1:8000/admin-panel/order/{new_order.id}/
+View full order at: http://ade22.pythonanywhere.com/admin-panel/order/{new_order.id}/
                 ''',
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=['Seunopeyemi1708@gmail.com'],
@@ -260,8 +263,12 @@ View full order at: http://127.0.0.1:8000/admin-panel/order/{new_order.id}/
         except:
             pass
 
+        # STORE ORDER ID IN SESSION BEFORE CLEARING CART
+        request.session['last_order_id'] = new_order.id
         request.session['cart'] = {}
         request.session.modified = True
+        request.session.save()
+
         return redirect('payment', order_id=new_order.id)
 
     cart_data = request.session.get('cart', {})
