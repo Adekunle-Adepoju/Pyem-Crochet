@@ -8,54 +8,45 @@ from django.conf import settings
 from .models import Product, Order, OrderItem
 
 
-# ─── HOME ───
 def home(request):
     products = Product.objects.all()[:3]
     return render(request, 'index.html', {'products': products})
 
 
-# ─── SHOP ───
 def shop(request):
     category = request.GET.get('category')
     if category:
         all_products = Product.objects.filter(category=category)
     else:
         all_products = Product.objects.all()
-
     paginator = Paginator(all_products, 20)
     page_number = request.GET.get('page')
     products = paginator.get_page(page_number)
-
     return render(request, 'shop.html', {
         'products': products,
         'category': category,
     })
 
 
-# ─── SIGN IN ───
 def signin(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
-
         user = None
         try:
             user_obj = User.objects.get(email=email)
             user = authenticate(request, username=user_obj.username, password=password)
         except User.DoesNotExist:
             user = authenticate(request, username=email, password=password)
-
         if user is not None:
             login(request, user)
             messages.success(request, 'Welcome back, ' + user.first_name + '!')
             return redirect('index')
         else:
             messages.error(request, 'Incorrect email or password. Please try again.')
-
     return render(request, 'signin.html')
 
 
-# ─── REGISTER ───
 def register(request):
     if request.method == 'POST':
         first_name = request.POST.get('first_name')
@@ -64,19 +55,15 @@ def register(request):
         phone = request.POST.get('phone')
         password1 = request.POST.get('password1')
         password2 = request.POST.get('password2')
-
         if password1 != password2:
             messages.error(request, 'Passwords do not match. Please try again.')
             return render(request, 'register.html')
-
         if User.objects.filter(email=email).exists():
             messages.error(request, 'An account with this email already exists. Please sign in instead.')
             return render(request, 'register.html')
-
         if User.objects.filter(username=email).exists():
             messages.error(request, 'An account with this email already exists. Please sign in instead.')
             return render(request, 'register.html')
-
         try:
             user = User.objects.create_user(
                 username=email,
@@ -91,26 +78,21 @@ def register(request):
         except Exception as e:
             messages.error(request, str(e))
             return render(request, 'register.html')
-
     return render(request, 'register.html')
 
 
-# ─── SIGN OUT ───
 def signout(request):
     logout(request)
     return redirect('index')
 
 
-# ─── CART ───
 def cart(request):
     if not request.user.is_authenticated:
         messages.error(request, 'You need to sign in to view your cart.')
         return redirect('signin')
-
     cart_data = request.session.get('cart', {})
     cart_items = []
     cart_total = 0
-
     for product_id, quantity in cart_data.items():
         try:
             product = Product.objects.get(id=product_id)
@@ -125,9 +107,7 @@ def cart(request):
             })
         except Product.DoesNotExist:
             pass
-
     grand_total = cart_total + 1500
-
     return render(request, 'cart.html', {
         'cart_items': cart_items,
         'cart_total': cart_total,
@@ -135,7 +115,6 @@ def cart(request):
     })
 
 
-# ─── ADD TO CART ───
 def add_to_cart(request, product_id):
     cart_data = request.session.get('cart', {})
     key = str(product_id)
@@ -148,7 +127,6 @@ def add_to_cart(request, product_id):
     return redirect('shop')
 
 
-# ─── INCREASE CART ───
 def increase_cart(request, product_id):
     cart_data = request.session.get('cart', {})
     key = str(product_id)
@@ -158,7 +136,6 @@ def increase_cart(request, product_id):
     return redirect('cart')
 
 
-# ─── DECREASE CART ───
 def decrease_cart(request, product_id):
     cart_data = request.session.get('cart', {})
     key = str(product_id)
@@ -170,7 +147,6 @@ def decrease_cart(request, product_id):
     return redirect('cart')
 
 
-# ─── REMOVE FROM CART ───
 def remove_from_cart(request, product_id):
     cart_data = request.session.get('cart', {})
     key = str(product_id)
@@ -180,7 +156,6 @@ def remove_from_cart(request, product_id):
     return redirect('cart')
 
 
-# ─── ORDER ───
 def order(request):
     if not request.user.is_authenticated:
         messages.error(request, 'You need to sign in before placing an order.')
@@ -190,7 +165,7 @@ def order(request):
         cart_data = request.session.get('cart', {})
 
         if not cart_data:
-            messages.error(request, 'Your cart is empty.')
+            messages.error(request, 'Your cart is empty. Please add items before ordering.')
             return redirect('shop')
 
         new_order = Order.objects.create(
@@ -236,7 +211,6 @@ def order(request):
         new_order.total = cart_total + 1500
         new_order.save()
 
-        # NOTIFY ADMIN
         try:
             send_mail(
                 subject=f'New Order #{new_order.id} from {new_order.full_name}',
@@ -274,7 +248,7 @@ COLOUR PREFERENCE
 Colour: {new_order.colour}
 Notes: {new_order.colour_notes}
 
-View full order at: http://ade22.pythonanywhere.com/admin-panel/order/{new_order.id}/
+View full order at: http://127.0.0.1:8000/admin-panel/order/{new_order.id}/
                 ''',
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=['Seunopeyemi1708@gmail.com'],
@@ -284,12 +258,12 @@ View full order at: http://ade22.pythonanywhere.com/admin-panel/order/{new_order
             pass
 
         request.session['cart'] = {}
+        request.session.modified = True
         return redirect('payment', order_id=new_order.id)
 
     cart_data = request.session.get('cart', {})
     cart_items = []
     cart_total = 0
-
     for product_id, quantity in cart_data.items():
         try:
             product = Product.objects.get(id=product_id)
@@ -302,9 +276,7 @@ View full order at: http://ade22.pythonanywhere.com/admin-panel/order/{new_order
             })
         except Product.DoesNotExist:
             pass
-
     grand_total = cart_total + 1500
-
     return render(request, 'order.html', {
         'cart_items': cart_items,
         'cart_total': cart_total,
@@ -312,7 +284,6 @@ View full order at: http://ade22.pythonanywhere.com/admin-panel/order/{new_order
     })
 
 
-# ─── PAYMENT ───
 def payment(request, order_id):
     if not request.user.is_authenticated:
         return redirect('signin')
@@ -324,23 +295,18 @@ def payment(request, order_id):
     })
 
 
-# ─── CONFIRM PAYMENT ───
 def confirm_payment(request, order_id):
     if not request.user.is_authenticated:
         return redirect('signin')
     order = get_object_or_404(Order, id=order_id)
-
     if request.method == 'POST':
         transfer_reference = request.POST.get('transfer_reference')
         receipt = request.FILES.get('receipt')
-
         order.transfer_reference = transfer_reference
         order.payment_status = 'Awaiting Confirmation'
         if receipt:
             order.receipt = receipt
         order.save()
-
-        # NOTIFY ADMIN
         try:
             send_mail(
                 subject=f'Payment Receipt Submitted – Order #{order.id}',
@@ -362,26 +328,21 @@ http://ade22.pythonanywhere.com/admin-panel/order/{order.id}/
             )
         except:
             pass
-
         messages.success(request, 'Payment details submitted! We will confirm within a few hours.')
         return redirect('success')
-
     return redirect('payment', order_id=order.id)
 
 
-# ─── SUCCESS ───
 def success(request):
     return render(request, 'success.html')
 
 
-# ─── PROFILE ───
 def profile(request):
     if not request.user.is_authenticated:
         return redirect('signin')
     return render(request, 'profile.html', {'user': request.user})
 
 
-# ─── MY ORDERS ───
 def my_orders(request):
     if not request.user.is_authenticated:
         return redirect('signin')
@@ -389,7 +350,6 @@ def my_orders(request):
     return render(request, 'my_orders.html', {'orders': orders})
 
 
-# ─── DELETE ACCOUNT ───
 def delete_account(request):
     if not request.user.is_authenticated:
         return redirect('signin')
@@ -402,7 +362,6 @@ def delete_account(request):
     return render(request, 'delete_account.html')
 
 
-# ─── ADMIN PANEL ───
 def admin_panel(request):
     if not request.user.is_staff:
         return redirect('index')
@@ -414,7 +373,6 @@ def admin_panel(request):
     })
 
 
-# ─── ADD PRODUCT ───
 def add_product(request):
     if not request.user.is_staff:
         return redirect('index')
@@ -427,12 +385,10 @@ def add_product(request):
         badge = request.POST.get('badge')
         description = request.POST.get('description')
         image = request.FILES.get('image')
-
         if discount_price and discount_price.strip() != '':
             discount_price = discount_price.strip()
         else:
             discount_price = None
-
         Product.objects.create(
             name=name,
             price=price,
@@ -448,12 +404,10 @@ def add_product(request):
     return redirect('admin_panel')
 
 
-# ─── EDIT PRODUCT ───
 def edit_product(request, product_id):
     if not request.user.is_staff:
         return redirect('index')
     product = get_object_or_404(Product, id=product_id)
-
     if request.method == 'POST':
         product.name = request.POST.get('name')
         product.price = request.POST.get('price')
@@ -463,18 +417,14 @@ def edit_product(request, product_id):
         product.gender = request.POST.get('gender')
         product.badge = request.POST.get('badge')
         product.description = request.POST.get('description')
-
         if request.FILES.get('image'):
             product.image = request.FILES.get('image')
-
         product.save()
         messages.success(request, '"' + product.name + '" has been updated successfully!')
         return redirect('admin_panel')
-
     return render(request, 'edit_product.html', {'product': product})
 
 
-# ─── DELETE PRODUCT ───
 def delete_product(request, product_id):
     if not request.user.is_staff:
         return redirect('index')
@@ -484,7 +434,6 @@ def delete_product(request, product_id):
     return redirect('admin_panel')
 
 
-# ─── ORDER DETAIL ───
 def order_detail(request, order_id):
     if not request.user.is_staff:
         return redirect('index')
@@ -492,14 +441,11 @@ def order_detail(request, order_id):
     items = order.items.all()
 
     if request.method == 'POST':
-
-        # CONFIRM PAYMENT
         payment_action = request.POST.get('payment_action')
         if payment_action == 'confirm':
             order.payment_status = 'Half Paid'
             order.amount_paid = order.total / 2
             order.save()
-
             try:
                 send_mail(
                     subject=f'Payment Confirmed – Order #{order.id}',
@@ -521,11 +467,9 @@ Thank you for choosing Pyem Stitches!
                 )
             except:
                 pass
-
             messages.success(request, 'Payment confirmed! Customer has been notified.')
             return redirect('order_detail', order_id=order.id)
 
-        # UPDATE STATUS
         old_status = order.status
         new_status = request.POST.get('status')
         order.status = new_status
@@ -548,7 +492,6 @@ If you have any questions contact us:
 
 Thank you for choosing Pyem Stitches!
                     '''
-
                 elif new_status == 'Delivered':
                     subject = f'Your Order #{order.id} has been delivered!'
                     message = f'''
@@ -566,7 +509,6 @@ If you have any issues contact us:
 
 Thank you for choosing Pyem Stitches!
                     '''
-
                 elif new_status == 'Cancelled':
                     subject = f'Your Order #{order.id} has been cancelled'
                     message = f'''
@@ -580,7 +522,6 @@ If you think this is a mistake or need more information please contact us:
 
 We are sorry for any inconvenience caused.
                     '''
-
                 else:
                     subject = None
                     message = None
@@ -593,7 +534,6 @@ We are sorry for any inconvenience caused.
                         recipient_list=[order.email],
                         fail_silently=True,
                     )
-
             except:
                 pass
 
