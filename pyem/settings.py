@@ -124,3 +124,6 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'Seunopeyemi1708@gmail.com'
 EMAIL_HOST_PASSWORD = 'gwkd qkfq hizw gpnq'
 DEFAULT_FROM_EMAIL = 'Seunopeyemi1708@gmail.com'
+
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'

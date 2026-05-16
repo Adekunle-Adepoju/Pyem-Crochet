@@ -16,9 +16,9 @@ def home(request):
 def shop(request):
     category = request.GET.get('category')
     if category:
-        all_products = Product.objects.filter(category=category)
+        all_products = Product.objects.filter(category=category).order_by('-created_at')
     else:
-        all_products = Product.objects.all()
+        all_products = Product.objects.all().order_by('-created_at')
     paginator = Paginator(all_products, 20)
     page_number = request.GET.get('page')
     products = paginator.get_page(page_number)
@@ -34,9 +34,12 @@ def signin(request):
         password = request.POST.get('password')
         user = None
         try:
-            user_obj = User.objects.get(email=email)
-            user = authenticate(request, username=user_obj.username, password=password)
-        except User.DoesNotExist:
+            user_obj = User.objects.filter(email=email).first()
+            if user_obj:
+                user = authenticate(request, username=user_obj.username, password=password)
+            else:
+                user = authenticate(request, username=email, password=password)
+        except Exception:
             user = authenticate(request, username=email, password=password)
         if user is not None:
             login(request, user)
