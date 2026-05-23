@@ -1,0 +1,21 @@
+name: Deploy to PythonAnywhere
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to PythonAnywhere
+        run: |
+          curl -X POST \
+            --data "branch=main" \
+            --header "Authorization: Token ${{ secrets.PYTHONANYWHERE_TOKEN }}" \
+            https://www.pythonanywhere.com/api/v0/user/${{ secrets.PYTHONANYWHERE_USERNAME }}/consoles/ \
+          
+          curl -X POST \
+            --header "Authorization: Token ${{ secrets.PYTHONANYWHERE_TOKEN }}" \
+            https://www.pythonanywhere.com/api/v0/user/${{ secrets.PYTHONANYWHERE_USERNAME }}/webapps/ade22.pythonanywhere.com/reload/
